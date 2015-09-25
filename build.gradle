@@ -16,8 +16,6 @@ repositories {
 }
 
 dependencies {
-    compile files('libs/gospel-1.0-SNAPSHOT.jar')
-
     compile group: 'org.scala-lang', name: 'scala-compiler', version: '2.11.7'
     compile group: 'org.processing', name: 'core', version:'3.0b5'
 
