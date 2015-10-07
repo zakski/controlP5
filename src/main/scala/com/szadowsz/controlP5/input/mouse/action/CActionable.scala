@@ -46,10 +46,10 @@ trait CActionable[T <: CActionable[T]] extends CMouseInteractable[T] {
    * Method to process mouse being released while controller is in focus.
    */
   override def mouseReleased(): Unit = {
-    _isPressed = false
     if (_activateBy == ActivateByType.RELEASE && _isMouseInside) {
       activation()
     }
+    _isPressed = false
   }
 
 

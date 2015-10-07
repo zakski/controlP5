@@ -18,7 +18,7 @@ object SVector {
  *
  * @author Zakski : 07/09/2015.
  */
-class SVector(x: Float, y: Float, z: Float) extends PVector(x, y, z) {
+class SVector(nx: Float, ny: Float,nz: Float) extends PVector(nx, ny, nz) {
 
   def this(that: PVector) {
     this(that.x, that.y, that.z)

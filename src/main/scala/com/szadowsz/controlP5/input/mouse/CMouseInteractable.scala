@@ -1,6 +1,8 @@
 package com.szadowsz.controlP5.input.mouse
 
-trait CMouseInteractable[T <: CMouseInteractable[T]] {
+import com.szadowsz.processing.SVector
+
+trait CMouseInteractable[+T] {
 
   /**
    * If the object has the mouse inside its bounds.
@@ -18,6 +20,8 @@ trait CMouseInteractable[T <: CMouseInteractable[T]] {
    * @return true if the mouse is inside, false otherwise.s
    */
   def isMouseOver: Boolean = _isMouseInside
+
+  def isInside(position : SVector): Boolean
 
   /**
    * Method to set whether the Mouse is over the interactable object.
@@ -39,6 +43,11 @@ trait CMouseInteractable[T <: CMouseInteractable[T]] {
     }
     this.asInstanceOf[T]
   }
+
+  def mouseMovedEvent(curr: SVector, prev: SVector):Unit = {
+    setMouseOver(isInside(curr))
+  }
+
 
   /**
    * Method to process interactions that happen when the mouse enters the object.

@@ -12,7 +12,7 @@ import scala.collection.{mutable => m}
  * @author Zakski : 06/09/2015.
  */
 private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
-  protected lazy val _logger = LoggerFactory.getLogger("ControlP5.input")
+  protected lazy val _logger = LoggerFactory.getLogger(this.getClass)
 
   /**
    * List to store keys as they are pressed and released, as well as how long they have been held for.
@@ -34,7 +34,7 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
   /**
    * Controller with text editing that is in focus.
    */
-  protected var _inFocus: Option[KeyEventHandler] = None
+  protected var _inFocus: Option[CKeyListener] = None
 
   /**
    * Method to check for a key press
@@ -92,7 +92,7 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
    */
   def getDownedKeys: Iterable[Int] = _keys.keys
 
-  def attachHandler(handle : KeyEventHandler): Unit = {
+  def attachHandler(handle : CKeyListener): Unit = {
     _inFocus = Some(handle)
   }
 
@@ -177,7 +177,7 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
       releaseKey(event.getKeyCode)
     }
     if (_inFocus.isDefined) {
-      _inFocus.get.handleKeyEvent(event)
+      _inFocus.get.keyEvent(event)
     }
   }
 }
