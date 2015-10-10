@@ -177,6 +177,19 @@ class CColour(cfg: Int, cbg: Int, cactive: Int, ccl: Int, cvl: Int) extends Seri
     colourable.setColourValue(_value)
   }
 
+  /**
+   * Method to copy this colour to a colour object.
+   *
+   * @param colour - the colour object that we want to colour.
+   */
+  def copyTo(colour: CColour): Unit = {
+    colour.setBackground(_background)
+    colour.setForeground(_foreground)
+    colour.setActive(_active)
+    colour.setCaption(_caption)
+    colour.setValue(_value)
+  }
+
     override def hashCode: Int = {
       var result: Int = 23
       result = 37 * result + _background

@@ -19,8 +19,7 @@ package com.szadowsz.controlP5.drawable
 import com.szadowsz.controlP5.ControlP5
 import com.szadowsz.controlP5.drawable.label.CFont
 import com.szadowsz.controlP5.drawable.layer.{CLayer, CScreen}
-import com.szadowsz.controlP5.drawable.widget.controller.CButton
-import com.szadowsz.controlP5.input.keys.{CKeyListener, KeyWrangler}
+import com.szadowsz.controlP5.input.keys.{CKeyListener, CKeyboard}
 import com.szadowsz.controlP5.input.mouse.{CMouse, CMouseListener}
 import com.szadowsz.processing.SVector
 import org.slf4j.{Logger, LoggerFactory}
@@ -31,16 +30,33 @@ object CWindow {
   private val DEFAULT_KEY_HOLD_TIME: Long = 5000
 }
 
-private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLayer: CScreen) extends CIdentification with CKeyListener with CMouseListener {
+/**
+ * The PApplet handler class, designed to handle aspects of the PApplet that are of interest to the UI. Generally we
+ * want to hide this class from being directly accessible, and instead perform operations on it indirectly, from either
+ * the active CLayer instance or the overall ControlP5 object.
+ *
+ * @param cp5 the base UI object, responsible for managing a collection of CWindows.
+ * @param applet the PApplet instance that this CWindow is managing.
+ * @param title the PApplet instance that this CWindow is managing.
+ * @param baseLayer the first CScreen we will be displaying, blank by default.
+ */
+private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: String, baseLayer: CScreen)
+  extends CIdentification with CKeyListener with CMouseListener {
+
   /**
    * SLF4J logger resource.
    */
   protected val _logger: Logger = LoggerFactory.getLogger(this.getClass)
 
   /**
-   * Parent GUI manager instance.
+   * Parent UI manager instance.
    */
   protected val _parent: ControlP5 = cp5
+
+  /**
+   * Name of the window instance, assigned to the PApplet Window.
+   */
+  protected var _name: String = initTitle(applet, title)
 
   /**
    * Attached Processing instance.
@@ -48,9 +64,9 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
   protected val _applet: PApplet = initApplet(applet)
 
   /**
-   * Attached PGraphics instance.
+   * Graphical Context of the attached Processing instance.
    */
-  protected val _graphics: PGraphics = _applet.g
+  protected val _graphics: PGraphics = _applet.getGraphics
 
   /**
    * Stack for All Attached UI layers, head is most recent active layer.
@@ -65,19 +81,17 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
   /**
    * Keyboard handling class for the connected PApplet instance.
    */
-  protected val _keys: KeyWrangler = initKeyHandler(CWindow.DEFAULT_KEY_HOLD_TIME)
+  protected val _keys: CKeyboard = initKeyHandler(CWindow.DEFAULT_KEY_HOLD_TIME)
 
   /**
    * Mouse handling class for the connected PApplet instance.
    */
   protected val _mouse: CMouse = initMouseHandler()
 
-  protected var _font: CFont = new CFont(getPApplet.createFont("Ariel", 12))
-
   /**
-   * Window Name.
+   * Default Font for this Window.
    */
-  protected var _name: String = "main"
+  protected var _font: CFont = new CFont(_applet.createFont("Ariel", 12))
 
   /**
    * Whether the Window is visible.
@@ -89,7 +103,6 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
    */
   protected var _isAutoDraw: Boolean = true
 
-
   /**
    * Method to initial the method registration required by the PApplet.
    *
@@ -97,10 +110,26 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
    * @return the updated PApplet.
    */
   protected def initApplet(applet: PApplet): PApplet = {
+    _logger.info("Registering UI Methods for {}", _name)
     applet.registerMethod("pre", this)
     applet.registerMethod("draw", this)
     applet.registerMethod("dispose", this)
+    _logger.info("UI Methods Registered Successfully")
     applet
+  }
+
+  /**
+   * Method to initial the method registration required by the PApplet.
+   *
+   * @param applet the PApplet instance to attach to this window.
+   * @param title the name to assign to the PApplet Surface.
+   * @return the title.
+   */
+  protected def initTitle(applet: PApplet, title: String): String = {
+    _logger.info("Setting PApplet Title \"{}\"", title)
+    applet.getSurface.setTitle(title)
+    _logger.info("Title Initialised Successfully")
+    title
   }
 
   /**
@@ -118,14 +147,14 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
    * Method to activate a handler to process PApplet key events.
    *
    * @param holdTime the time to elapse before a key is considered held.
-   * @return a KeyWrangler bound to the PApplet.
+   * @return a CKeyboard bound to the PApplet.
    */
-  protected def initKeyHandler(holdTime: Long): KeyWrangler = {
-    _logger.info("Initialising Key Handling for PApplet")
-    val keys = new KeyWrangler(holdTime)
+  protected def initKeyHandler(holdTime: Long): CKeyboard = {
+    _logger.info("Initialising Key Handling for {}", _name)
+    val keys = new CKeyboard(holdTime)
     _applet.registerMethod("keyEvent", keys)
     keys.attachHandler(this)
-    _logger.info("Initialisation of Key Handling successful")
+    _logger.info("Key Handling Initialised Successfully")
     keys
   }
 
@@ -135,11 +164,11 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
    * @return a MousePointer bound to the PApplet.
    */
   protected def initMouseHandler(): CMouse = {
-    _logger.info("Initialising Mouse Handling for PApplet")
+    _logger.info("Initialising Mouse Pointer for {}", _name)
     val mouse = new CMouse(_applet.mouseX, _applet.mouseY)
     _applet.registerMethod("mouseEvent", mouse)
     mouse.attachHandler(this)
-    _logger.info("Initialisation of Mouse Handling successful")
+    _logger.info("Mouse Pointer Initialised Successfully")
     mouse
   }
 
@@ -157,7 +186,7 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
    */
   def getPApplet: PApplet = _applet
 
-  def getFont: CFont =_font
+  def getFont: CFont = _font
 
   /**
    * Method to get the parent ControlP5 instance connected to the CWindow.
@@ -165,6 +194,9 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
    * @return the attached to ControlP5 instance.
    */
   def getCP5: ControlP5 = _parent
+
+  def getCurrentLayer: CLayer = _layers.head
+
 
   /**
    * Method to check the visibility of the CWindow.
@@ -188,20 +220,23 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
    */
   def setAutoDraw(flag: Boolean): CWindow = {
     if (_isAutoDraw != flag) {
+      _logger.info("Setting AutoDraw to {} for {}", flag, _name)
       if (!flag) {
         _applet.unregisterMethod("draw", this)
       } else {
         _applet.registerMethod("draw", this)
       }
       _isAutoDraw = flag
+      _logger.info("AutoDraw change for {} complete", _name)
     }
     this
   }
 
-  def addButton(name: String, x: Int, y: Int, width: Int, height: Int): CButton = {
-    _layers.head.addButton(name, x, y, width, height)
-  }
-
+  /**
+   * Method to handle a Key Event in a responsible manner.
+   *
+   * @param event the Processing Key Event that has occurred.
+   */
   override def keyEvent(event: KeyEvent): Unit = {
     if (_isVisible && _layers.nonEmpty) {
       _layers.head.keyEvent(event)
@@ -231,8 +266,23 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
   }
 
   def pre(): Unit = {
-    _layerCache = _layers.take(_layers.indexWhere(_.isInstanceOf[CScreen]) + 1).reverse
     _layers.head.pre()
+    _layerCache = _layers.take(_layers.indexWhere(_.isInstanceOf[CScreen]) + 1).reverse
+  }
+
+  def go(screen: CScreen): Unit ={
+    _layers.foreach(_.dispose())
+    _layers = List(screen)
+  }
+
+  def push(layer: CLayer): Unit ={
+    _layers = layer +: _layers
+  }
+
+  def pop():Unit = {
+    _layers.head.dispose()
+    _layers = _layers.tail
+    _layerCache = _layers.take(_layers.indexWhere(_.isInstanceOf[CScreen]) + 1).reverse
   }
 
   def draw(): Unit = {
@@ -240,17 +290,13 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, baseLaye
   }
 
   def dispose(): Unit = {
-    _layers match {
-      case Nil =>
-        _applet.unregisterMethod("keyEvent", _keys)
-        _applet.unregisterMethod("mouseEvent", _mouse)
-        _applet.unregisterMethod("pre", this)
-        _applet.unregisterMethod("dispose", this)
-        if (isAutoDraw) _applet.unregisterMethod("draw", this)
-      case head :: tail =>
-        head.dispose()
-        _layers = tail
-        dispose()
+    _layers.foreach(_.dispose())
+    _applet.unregisterMethod("keyEvent", _keys)
+    _applet.unregisterMethod("mouseEvent", _mouse)
+    _applet.unregisterMethod("pre", this)
+    _applet.unregisterMethod("dispose", this)
+    if (isAutoDraw){
+      _applet.unregisterMethod("draw", this)
     }
   }
 }

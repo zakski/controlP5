@@ -11,7 +11,7 @@ import scala.collection.{mutable => m}
  *
  * @author Zakski : 06/09/2015.
  */
-private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
+private[controlP5] class CKeyboard(timeBeforeConsideredHeld: Long) {
   protected lazy val _logger = LoggerFactory.getLogger(this.getClass)
 
   /**
@@ -24,12 +24,10 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
    */
   protected var _holdTime: Long = timeBeforeConsideredHeld
 
-  protected var _lastKey : Char = 0
-
   /**
    * List to store current keyboard shortcuts.
    */
-  protected var _chords = Map[ChordKey, ChordFunction]()
+  protected var _chords = Map[CChord, ChordFunction]()
 
   /**
    * Controller with text editing that is in focus.
@@ -65,13 +63,6 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
   }
 
   /**
-   * Method to get the last pressed key.
-   *
-   * @return a list of keys currently pressed.
-   */
-  def getKey: Char = _lastKey
-
-  /**
    * Method to get the pressed keys.
    *
    * @return a list of keys currently pressed.
@@ -103,7 +94,7 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
    * @param chord keys of the shortcut
    * @param function what the shortcut does
    */
-  def mapShortcut(chord : ChordKey, function: ChordFunction): Unit = {
+  def mapShortcut(chord : CChord, function: ChordFunction): Unit = {
     _chords = _chords + (chord -> function)
     _logger.info("Added a new keyboard shortcut")
   }
@@ -113,7 +104,7 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
    *
    * @param shortcuts the new shortcut layout to apply
    */
-  def mapShortcuts(shortcuts: Map[ChordKey, ChordFunction]): Unit = {
+  def mapShortcuts(shortcuts: Map[CChord, ChordFunction]): Unit = {
     clearKeys() // clear them so we don't inadvertently trigger a new shortcut.
     _chords = shortcuts
     _logger.info("Applied new keyboard shortcuts")
@@ -127,7 +118,6 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
    * @return true if the key has been added, false otherwise
    */
   def pressKey(code: Int): Boolean = {
-    _lastKey = code.toChar
     if (!_keys.contains(code)) {
       _logger.info("Pressed key: {}", j.KeyEvent.getKeyText(code))
       _keys.put(code, System.currentTimeMillis)
@@ -145,8 +135,8 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
    */
   def releaseKey(code: Int): Boolean = {
     if (_keys.contains(code)) {
-      _keys.remove(code)
-      _logger.info("Released key: {}", j.KeyEvent.getKeyText(code))
+      val time = _keys.remove(code)
+      _logger.info("Released key: {}, Held for {}", j.KeyEvent.getKeyText(code),time.get)
       true
     } else {
       _logger.warn("Couldn't Release key: {}", j.KeyEvent.getKeyText(code))
@@ -168,7 +158,7 @@ private[controlP5] class KeyWrangler(timeBeforeConsideredHeld: Long) {
     if (event.getAction == p.KeyEvent.PRESS) {
       pressKey(event.getKeyCode)
       if (_inFocus.isEmpty) {
-        val chordFunc = _chords.get(new ChordKey(getDownedKeys.toArray))
+        val chordFunc = _chords.get(new CChord(getDownedKeys.toArray))
         if (chordFunc.isDefined) {
           chordFunc.get.chordShortcut()
         }

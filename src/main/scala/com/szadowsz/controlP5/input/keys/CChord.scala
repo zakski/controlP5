@@ -3,11 +3,11 @@ package com.szadowsz.controlP5.input.keys
 import java.awt.event.KeyEvent
 
 /**
- * A key combination used in the ui for some function.
+ * Class to represent a key combination used in the UI for some function.
  *
  * @author Zakski : 06/09/2015.
  */
-class ChordKey(keys: Array[Int]) {
+class CChord(keys: Array[Int]) {
 
   /**
    * List of keys that make up this shortcut
@@ -41,7 +41,7 @@ class ChordKey(keys: Array[Int]) {
    */
   override def equals(that: Any): Boolean = {
     that match {
-      case other: ChordKey => _keys.sameElements(other._keys)
+      case other: CChord => _keys.sameElements(other._keys)
       case _ => false
     }
   }

@@ -16,7 +16,7 @@ trait CColourable[+T] {
    *
    * @return the object's Colour.
    */
-  def getColour: CColour = _colour
+  final def getColour: CColour = _colour
 
   /**
    * Method to set the object's colour.
@@ -24,7 +24,7 @@ trait CColourable[+T] {
    * @param colour the object's new colour.
    * @return the updated object.
    */
-  final def setColour(colour: CColour): T = {
+  def setColour(colour: CColour): T = {
     colour.copyTo(this)
     this.asInstanceOf[T]
   }

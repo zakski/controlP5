@@ -48,9 +48,10 @@ class CButtonExample extends PApplet {
   override def setup(): Unit = {
     surface.setResizable(false)
     cp5 = new ControlP5(this)
+    val layer = cp5.getWindowContext("CButtonExample")
 
     // create a new button with name 'buttonA'
-    val colA = cp5.addButton("colour A", 100, 100, 200, 19)
+    val colA = layer.addButton("colour A", 100, 100, 200, 19)
     colA.plugTo((b: Boolean) => {
       println("A button event from colour A")
       n = 0.0f
@@ -58,7 +59,7 @@ class CButtonExample extends PApplet {
       c2 = color(0, 160, 100)
     })
 
-    val colB = cp5.addButton("colour B", 100, 120, 200, 19)
+    val colB = layer.addButton("colour B", 100, 120, 200, 19)
     colB.plugTo((b: Boolean) => {
       println("A button event from colour B")
       n = 0.0f
@@ -66,7 +67,7 @@ class CButtonExample extends PApplet {
       c2 = color(150, 0, 0)
     })
 
-    val colC = cp5.addButton("colour C", 100, 140, 200, 19)
+    val colC = layer.addButton("colour C", 100, 140, 200, 19)
     colC.plugTo((b: Boolean) => {
       println("A button event from colour C")
       n = 0.0f
@@ -74,7 +75,7 @@ class CButtonExample extends PApplet {
       c2 = color(255, 255, 0)
     })
 
-    val play = cp5.addButton("play",140,280,200,19)
+    val play = layer.addButton("play",140,280,200,19)
     play.plugTo((b: Boolean) => {
       println("A button event from Play")
       n = 0.0f
@@ -82,7 +83,7 @@ class CButtonExample extends PApplet {
       c2 = color(0,0,0)
     })
 
-    val playAg = cp5.addButton("Play Again",210,300,200,19)
+    val playAg = layer.addButton("Play Again",210,300,200,19)
     playAg.plugTo((b: Boolean) => n = 0.0f)
   }
 
