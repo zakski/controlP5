@@ -38,9 +38,8 @@ object CWindow {
  * @param cp5 the base UI object, responsible for managing a collection of CWindows.
  * @param applet the PApplet instance that this CWindow is managing.
  * @param title the PApplet instance that this CWindow is managing.
- * @param baseLayer the first CScreen we will be displaying, blank by default.
  */
-private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: String, baseLayer: CScreen)
+private[controlP5] final class CWindow protected (cp5: ControlP5, applet: PApplet, title: String)
   extends CIdentification with CKeyListener with CMouseListener {
 
   /**
@@ -53,6 +52,7 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: S
    */
   protected val _parent: ControlP5 = cp5
 
+
   /**
    * Name of the window instance, assigned to the PApplet Window.
    */
@@ -64,6 +64,11 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: S
   protected val _applet: PApplet = initApplet(applet)
 
   /**
+   * Default Font for this Window.
+   */
+  protected var _font: CFont = new CFont(_applet.createFont("Ariel", 12))
+
+  /**
    * Graphical Context of the attached Processing instance.
    */
   protected val _graphics: PGraphics = _applet.getGraphics
@@ -71,7 +76,7 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: S
   /**
    * Stack for All Attached UI layers, head is most recent active layer.
    */
-  protected var _layers: List[CLayer] = initLayer(baseLayer)
+  protected var _layers: List[CLayer] = List()
 
   /**
    * Stack for Drawable UI layers, head is the last active layer.
@@ -89,11 +94,6 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: S
   protected val _mouse: CMouse = initMouseHandler()
 
   /**
-   * Default Font for this Window.
-   */
-  protected var _font: CFont = new CFont(_applet.createFont("Ariel", 12))
-
-  /**
    * Whether the Window is visible.
    */
   protected var _isVisible: Boolean = true
@@ -102,6 +102,17 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: S
    * Whether the Window should be automatically drawn by the Processing instance.
    */
   protected var _isAutoDraw: Boolean = true
+
+  def this(cp5: ControlP5, applet: PApplet, title: String, screen: Class[_ <: CScreen]){
+    this(cp5,applet,title)
+    _layers = List(screen.getConstructor(this.getClass).newInstance(this))
+  }
+
+  def this(cp5: ControlP5, applet: PApplet, title: String, screen : CScreen){
+    this(cp5,applet,title)
+    screen.setWindow(this)
+    _layers = List(screen)
+  }
 
   /**
    * Method to initial the method registration required by the PApplet.
@@ -130,17 +141,6 @@ private[controlP5] final class CWindow(cp5: ControlP5, applet: PApplet, title: S
     applet.getSurface.setTitle(title)
     _logger.info("Title Initialised Successfully")
     title
-  }
-
-  /**
-   * Method to initial the method registration required by the PApplet.
-   *
-   * @param base the PApplet instance to attach to this window.
-   * @return the updated PApplet.
-   */
-  protected def initLayer(base: CScreen): List[CLayer] = {
-    base.setWindow(this)
-    List[CLayer](base)
   }
 
   /**

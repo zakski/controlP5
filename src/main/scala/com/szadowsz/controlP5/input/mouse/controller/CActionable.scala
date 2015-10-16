@@ -1,23 +1,23 @@
-package com.szadowsz.controlP5.input.mouse.action
-
-import com.szadowsz.controlP5.input.mouse.CMouseInteractable
+package com.szadowsz.controlP5.input.mouse.controller
 
 /**
+ * Expanded from the other Mouse Input Traits to provide an outlet to activate the controller if pressed / released.
+ *
  * @author Zakski : 09/09/2015.
  */
-trait CActionable[T <: CActionable[T]] extends CMouseInteractable[T] {
+trait CActionable extends CMouseInteractable {
 
   /**
    * When we should call the activation function.
    */
-  protected var _activateBy: ActivateByType = ActivateByType.RELEASE
+  protected var _activateBy: CActivateByType = CActivateByType.RELEASE
 
   /**
    * Method to identify how the Actionable object is activated.
    *
    * @return PRESS if activated by a mouse PRESS, otherwise returns RELEASE.
    */
-  def getActivateBy: ActivateByType = _activateBy
+  def getActivateBy: CActivateByType = _activateBy
 
   /**
    * An Actionable object can be activated by a mouse PRESS or mouse RELEASE. Default value is RELEASE.
@@ -25,28 +25,27 @@ trait CActionable[T <: CActionable[T]] extends CMouseInteractable[T] {
    * @param activation use PRESS or RELEASE as the parameter.
    * @return the update Actionable object.
    */
-  def setActivateBy(activation: ActivateByType): T = {
+  def setActivateBy(activation: CActivateByType): Unit = {
     _activateBy = activation
-    this.asInstanceOf[T]
   }
 
   /**
-   * Method to process mouse presses while controller is in focus.
+   * Method to handle the controller's reaction to the mouse being pressed.
    */
-  override def mousePressed(): Unit = {
+  override def mousePressedEvent(): Unit = {
     if (_isMouseInside) {
       _isPressed = true
-      if (_activateBy == ActivateByType.PRESS) {
+      if (_activateBy == CActivateByType.PRESS) {
         activation()
       }
     }
   }
 
   /**
-   * Method to process mouse being released while controller is in focus.
+   * Method to handle the controller's reaction to the mouse being released.
    */
-  override def mouseReleased(): Unit = {
-    if (_activateBy == ActivateByType.RELEASE && _isMouseInside) {
+  override def mouseReleasedEvent(): Unit = {
+    if (_activateBy == CActivateByType.RELEASE && _isMouseInside) {
       activation()
     }
     _isPressed = false

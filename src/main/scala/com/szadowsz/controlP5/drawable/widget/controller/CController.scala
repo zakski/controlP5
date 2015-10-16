@@ -10,8 +10,8 @@ import processing.core.PGraphics
 /**
  * @author Zakski : 04/10/2015.
  */
-abstract class CController[T <: CController[T]](name : String, layer: CLayer, parent: CGroup[_,_], v : SVector, width: Int, height: Int)
-  extends CBase[T](name,layer,parent,v,width,height){
+abstract class CController[T <: CController[T]](name: String, layer: CLayer, parent: CGroup[_, _], v: SVector, width: Int, height: Int)
+  extends CBase[T](name, layer, parent, v, width, height) {
 
   /**
    * How the Controller should be displayed.
@@ -19,16 +19,22 @@ abstract class CController[T <: CController[T]](name : String, layer: CLayer, pa
   protected var _view: CView[T]
 
 
+  def setView(view : CView[T]): Unit = {
+    view.init(this.asInstanceOf[T])
+    _view = view
+  }
+
   /**
    * Method to draw the object in the given PApplet.
    *
    * @param graphics Processing context.
    */
-  override def draw(graphics: PGraphics):Unit = {
-    graphics.pushMatrix( )
-    graphics.translate(_position.x ,_position.y)
-    _view.display( graphics , this.asInstanceOf[T])
-    graphics.popMatrix( )
+  override def draw(graphics: PGraphics): Unit = {
+    if (isVisible) {
+      graphics.pushMatrix()
+      graphics.translate(_position.x, _position.y)
+      _view.display(graphics, this.asInstanceOf[T])
+      graphics.popMatrix()
+    }
   }
-
 }

@@ -84,7 +84,7 @@ object CLabel {
 
 class CLabel(layer: CLayer, theValue: String, theWidth: Int, theHeight: Int, theColor: Int) extends CDrawable {
   protected var _layer: CLayer = layer
-  protected var _font: CFont = _layer.getFont
+  protected var _font: CFont = new CFont(_layer.getFont)
   protected var _text: String = theValue
   protected var _type: LabelType = new SinglelineLabel
   protected var _style: CLabelStyle = new CLabelStyle
@@ -159,7 +159,7 @@ class CLabel(layer: CLayer, theValue: String, theWidth: Int, theHeight: Int, the
 
   def hasChanged: Boolean = _hasChanged
 
-  def isFixedSize: Boolean = if (isMultiline) false else isFixedSize
+  def isFixedSize: Boolean = if (isMultiline) false else _isFixedSize
 
   def isMultiline: Boolean = _isMultiline
 
@@ -336,10 +336,11 @@ class CLabel(layer: CLayer, theValue: String, theWidth: Int, theHeight: Int, the
         case AlignmentX.RIGHT =>
           x = control.getWidth - _font.getWidth - _paddingX
         case AlignmentX.LEFT_OUTSIDE =>
-          x = -_font.getWidth - _paddingX
+           x = -_font.getWidth - _paddingX
         case AlignmentX.RIGHT_OUTSIDE =>
           x = control.getWidth + _paddingX
        }
+
       alignY match {
         case AlignmentY.CENTER =>
           y = control.getHeight / 2 + _font.getTop - _font.getCenter

@@ -2,4 +2,6 @@ rootProject.name = 'controlP5'
 include 'examples'
 include 'examples'
 findProject(':examples')?.name = 'controlP5Examples'
+include 'core'
+findProject(':core')?.name = 'controlP5-core'
 

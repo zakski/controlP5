@@ -24,7 +24,12 @@ import processing.core.PGraphics
  *
  */
 trait CView[T <: CController[T]] {
- 
+
+  /**
+   * Any settings changes that are needed go here
+   */
+  def init(controller : T): Unit = {}
+
   /**
    * draws your custom controllers. display() will be called by a controller's draw() function and will pass
    * a reference of PApplet as well as the Controller itself to your custom display class.

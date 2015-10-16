@@ -5,10 +5,12 @@ import com.szadowsz.controlP5.drawable.colour.{CColour, CColourable}
 import com.szadowsz.controlP5.drawable.label.CFont
 import com.szadowsz.controlP5.drawable.widget.CBase
 import com.szadowsz.controlP5.drawable.widget.controller.CButton
+import com.szadowsz.controlP5.drawable.widget.controller.text.CTextField
 import com.szadowsz.controlP5.drawable.widget.group.CGroup
 import com.szadowsz.controlP5.drawable.{CDrawable, CWindow}
 import com.szadowsz.controlP5.input.keys.CKeyListener
-import com.szadowsz.controlP5.input.mouse.CMouseInteractable
+import com.szadowsz.controlP5.input.mouse.CMouseListener
+import com.szadowsz.controlP5.input.mouse.controller.CMouseInteractable
 import com.szadowsz.processing.SVector
 import processing.core.{PApplet, PGraphics}
 import processing.event.KeyEvent
@@ -16,24 +18,39 @@ import processing.event.KeyEvent
 import java.security.InvalidParameterException
 
 /**
+ * Base Class for UI Window layers inherited by both CScreen and CPopup. Provides all the functionality to add and
+ * remove widgets from the layer, as well as the ability to make changes to all widgets stored in this layer. Offers the
+ * option of initialising immediately with a window, or initialising once a window has been assigned.
+ *
  * @author Zakski : 01/10/2015.
  */
-abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer] {
+abstract class CLayer() extends CDrawable with CColourable[CLayer] with CMouseListener with CKeyListener {
 
   protected var _registry: Map[String, CBase[_]] = Map()
 
   protected var _controllers: List[CBase[_]] = List()
 
-  protected var _window: CWindow = window
+  protected var _window: CWindow = null
 
-  def getPApplet: PApplet = _window.getPApplet
+  final def getPApplet: PApplet = _window.getPApplet
 
-  def getCP5: ControlP5 = _window.getCP5
+  final def getCP5: ControlP5 = _window.getCP5
 
-  def getFont: CFont =  _window.getFont
+  def getFont: CFont = _window.getFont
 
-  def setWindow(window : CWindow): Unit = {
+  protected def init() = {}
+
+
+  def this(window : CWindow){
+    this()
+    setWindow(window)
+  }
+
+  final def setWindow(window: CWindow): Unit = {
     _window = window
+    _registry = Map()
+    _controllers = List()
+    init()
   }
 
   /**
@@ -42,7 +59,7 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
    * @param colour the object's new colour.
    * @return the updated object.
    */
-  override def setColour(colour: CColour): CLayer = {
+  final override def setColour(colour: CColour): CLayer = {
     _controllers.foreach(_.setColour(colour))
     colour.copyTo(_colour)
     this
@@ -54,7 +71,7 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
    * @param foreground - the new foreground colour.
    * @return the updated object.
    */
-  override def setColourForeground(foreground: Int): CLayer = {
+  final override def setColourForeground(foreground: Int): CLayer = {
     _colour.setForeground(foreground)
     _controllers.foreach(_.setColourForeground(foreground))
     this
@@ -66,7 +83,7 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
    * @param background - the new background colour.
    * @return the updated object.
    */
-  override def setColourBackground(background: Int): CLayer = {
+  final override def setColourBackground(background: Int): CLayer = {
     _colour.setBackground(background)
     _controllers.foreach(_.setColourBackground(background))
     this
@@ -90,7 +107,7 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
    * @param value - the new value label colour.
    * @return the updated object.
    */
-  override def setColourValue(value: Int): CLayer = {
+  final override def setColourValue(value: Int): CLayer = {
     _colour.setValue(value)
     _controllers.foreach(_.setColourValue(value))
     this
@@ -102,7 +119,7 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
    * @param active - the active colour
    * @return the object
    */
-  override def setColourActive(active: Int): CLayer = {
+  final override def setColourActive(active: Int): CLayer = {
     _colour.setActive(active)
     _controllers.foreach(_.setColourActive(active))
     this
@@ -110,15 +127,23 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
 
 
   def addButton(name: String, x: Int, y: Int, width: Int, height: Int): CButton = {
-    val button: CButton = new CButton(this, null, name, SVector(x, y), width, height)
-    register(button)
-    button
+    addButton(name,null, x, y, width, height)
   }
 
   def addButton(name: String, parent: CGroup[_, _], x: Int, y: Int, width: Int, height: Int): CButton = {
     val button: CButton = new CButton(this, parent, name, SVector(x, y), width, height)
     register(button)
     button
+  }
+
+  def addTextField(name: String, x: Int, y: Int, width: Int, height: Int): CTextField = {
+    addTextField(name,null, x, y, width, height)
+  }
+
+  def addTextField(name: String, parent: CGroup[_, _], x: Int, y: Int, width: Int, height: Int): CTextField = {
+    val text: CTextField = new CTextField(name, this, parent, SVector(x, y), width, height)
+    register(text)
+    text
   }
 
   /**
@@ -140,6 +165,18 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
     }
   }
 
+  def go(screen: CScreen): Unit = {
+    _window.go(screen)
+  }
+
+  def push(layer: CLayer): Unit = {
+    _window.push(layer)
+  }
+
+  def pop(): Unit = {
+    _window.pop()
+  }
+
   def pre(): Unit = {
 
   }
@@ -157,39 +194,63 @@ abstract class CLayer(window: CWindow) extends CDrawable with CColourable[CLayer
     // TODO
   }
 
-  def keyEvent(event: KeyEvent): Unit = {
+  /**
+   * Method to handle a Key Event in a responsible manner.
+   *
+   * @param event the Processing Key Event that has occurred.
+   */
+  final override def keyEvent(event: KeyEvent): Unit = {
     _controllers.foreach(c =>
       if (c.isInstanceOf[CKeyListener])
         c.asInstanceOf[CKeyListener].keyEvent(event)
     )
   }
 
-  def mouseMovedEvent(curr: SVector, prev: SVector): Unit = {
+  /**
+   * Method to handle object's reaction to the mouse being moved.
+   *
+   * @param curr the current location of the mouse.
+   * @param prev the previous location of the mouse.
+   */
+  final override def mouseMovedEvent(curr: SVector, prev: SVector): Unit = {
     _controllers.foreach(c =>
-      if (c.isInstanceOf[CMouseInteractable[_]])
-        c.asInstanceOf[CMouseInteractable[_]].mouseMovedEvent(curr, prev)
+      if (c.isInstanceOf[CMouseInteractable])
+        c.asInstanceOf[CMouseInteractable].mouseMovedEvent(curr, prev)
     )
   }
 
-
-  def mouseWheelEvent(movement: Int): Unit = {
+  /**
+   * Method to process mouse wheel movement while the object is in focus.
+   *
+   * @note movement will be negative if the mouse wheel was rotated up or away from the user, and positive in the other
+   *       direction. On Mac OS X, this will be reversed when "natural" scrolling is enabled in System Preferences.
+   *
+   * @param movement the change made by the mouse wheel.
+   */
+  final override def mouseWheelEvent(movement: Int): Unit = {
     _controllers.foreach(c =>
-      if (c.isInstanceOf[CMouseInteractable[_]])
-        c.asInstanceOf[CMouseInteractable[_]].mouseWheelRolled(movement)
+      if (c.isInstanceOf[CMouseInteractable])
+        c.asInstanceOf[CMouseInteractable].mouseWheelEvent(movement)
     )
   }
 
-  def mousePressedEvent(): Unit = {
-     _controllers.foreach(c =>
-      if (c.isInstanceOf[CMouseInteractable[_]])
-        c.asInstanceOf[CMouseInteractable[_]].mousePressed()
+  /**
+   * Method to handle object's reaction to the mouse being pressed.
+   */
+  final override def mousePressedEvent(): Unit = {
+    _controllers.foreach(c =>
+      if (c.isInstanceOf[CMouseInteractable])
+        c.asInstanceOf[CMouseInteractable].mousePressedEvent()
     )
   }
 
-  def mouseReleasedEvent(): Unit = {
+  /**
+   * Method to handle object's reaction to the mouse being released.
+   */
+  final override def mouseReleasedEvent(): Unit = {
     _controllers.foreach(c =>
-      if (c.isInstanceOf[CMouseInteractable[_]])
-        c.asInstanceOf[CMouseInteractable[_]].mouseReleased()
+      if (c.isInstanceOf[CMouseInteractable])
+        c.asInstanceOf[CMouseInteractable].mouseReleasedEvent()
     )
   }
 }

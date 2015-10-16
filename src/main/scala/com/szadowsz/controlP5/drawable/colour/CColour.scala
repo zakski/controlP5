@@ -28,11 +28,6 @@ object CColour {
   val THEME_RED = new CColour(0xffaa0000, 0xff660000, 0xffff0000, 0xffffffff, 0xffffffff)
   val THEME_GREY = new CColour(0xffeeeeee, 0xffbbbbbb, 0xffffffff, 0xff555555, 0xff555555)
   val THEME_A = new CColour(0xff00FFC8, 0xff00D7FF, 0xffffff00, 0xff00B0FF, 0xff00B0FF)
-
-
-  private val GLOBAL = new CColour(THEME_CP5BLUE)
-
-  def getGlobal : CColour = GLOBAL
 }
 
 
@@ -58,7 +53,7 @@ class CColour(cfg: Int, cbg: Int, cactive: Int, ccl: Int, cvl: Int) extends Seri
 
 
   def this() {
-    this(CColour.GLOBAL)
+    this(CColour.THEME_CP5BLUE)
   }
 
   /**

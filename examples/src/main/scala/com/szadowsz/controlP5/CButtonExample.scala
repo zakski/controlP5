@@ -13,7 +13,6 @@ package com.szadowsz.controlP5
 
 import processing.core.PApplet
 
-
 object CButtonExample {
 
 
@@ -31,7 +30,7 @@ object CButtonExample {
  */
 class CButtonExample extends PApplet {
 
-  var cp5: ControlP5 = _
+  var cp5: ControlP5 = null
 
   var colour = color(255)
 

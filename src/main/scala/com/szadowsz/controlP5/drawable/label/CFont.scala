@@ -44,15 +44,15 @@ object CFont {
     }
   }
 
-  def getWidthFor(theText: String, theLabel: CLabel, theApplet: PApplet): Int = {
-    theApplet.textFont(theLabel.getFont.pfont, theLabel.getFont.size)
-    theApplet.textWidth(theText).toInt
+  def getWidthFor(theText: String, theLabel: CLabel, graphics: PGraphics): Int = {
+    graphics.textFont(theLabel.getFont.pfont, theLabel.getFont.size)
+    graphics.textWidth(theText).toInt
   }
 }
 
 class CFont(theFont: PFont, theFontSize: Int, theLineHeight: Int) {
   private[label] var pfont: PFont = theFont
-  private[label] var txt: List[String]  = new ArrayList[String]
+  private[label] var txt: List[String] = new ArrayList[String]
   private[label] var s: String = ""
   private var top: Int = 0
   private var bottom: Int = 0
@@ -64,8 +64,13 @@ class CFont(theFont: PFont, theFontSize: Int, theLineHeight: Int) {
   private var offset: Array[Int] = new Array[Int](2)
   private var size: Int = theFontSize
 
+
   def this(theFont: PFont, theFontSize: Int) {
-   this(theFont, theFontSize, theFontSize + 2)
+    this(theFont, theFontSize, theFontSize + 2)
+  }
+
+  def this(theFont: CFont) {
+    this(theFont.getFont, theFont.size)
   }
 
   def this(theFont: PFont) {
@@ -96,7 +101,7 @@ class CFont(theFont: PFont, theFontSize: Int, theLineHeight: Int) {
 
   def getFont: PFont = pfont
 
-  def adjust(graphics : PGraphics, theLabel: CLabel) {
+  def adjust(graphics: PGraphics, theLabel: CLabel) {
     if (theLabel.hasChanged) {
       graphics.textFont(pfont, size)
       top = -graphics.textAscent.toInt
@@ -138,9 +143,9 @@ class CFont(theFont: PFont, theFontSize: Int, theLineHeight: Int) {
     val offset: Int = (PApplet.max(0, txt.size - maxLineNum) * PApplet.abs(theLabel.getOffsetYratio)).toInt
     val lim: Int = PApplet.min(txt.size, maxLineNum)
     s = ""
-      for(i <- 0 until lim){
-          s += txt.get(i + offset) + "\n"
-      }
+    for (i <- 0 until lim) {
+      s += txt.get(i + offset) + "\n"
+    }
   }
 
   def getOverflow: Int = textHeight - height
@@ -155,7 +160,7 @@ class CFont(theFont: PFont, theFontSize: Int, theLineHeight: Int) {
     }
     val loadedAlign: Int = papplet.g.textAlign
     papplet.textFont(pfont, size)
-   // papplet.textAlign(label.textAlign.code)
+    // papplet.textAlign(label.textAlign.code)
     papplet.fill(label.getColor)
     if (label.isMultiline) {
       papplet.fill(label.getColor)

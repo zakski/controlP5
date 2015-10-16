@@ -19,7 +19,7 @@ package com.szadowsz.controlP5.drawable.widget
 
 
 import com.szadowsz.controlP5.ControlP5
-import com.szadowsz.controlP5.drawable.colour.CColourable
+import com.szadowsz.controlP5.drawable.colour.{CColour, CColourable}
 import com.szadowsz.controlP5.drawable.label.CLabel
 import com.szadowsz.controlP5.drawable.layer.CLayer
 import com.szadowsz.controlP5.drawable.widget.group.CGroup
@@ -30,23 +30,63 @@ import com.szadowsz.processing.SVector
  *
  * The ControllerInterface is inherited by all ControllerGroup and Controller classes.
  *
+ * This class inherits the Identification, Colourable and the Drawable Traits.
+ *
  */
-abstract class CBase[+T](name : String, layer: CLayer, group: CGroup[_,_], v : SVector, width: Int, height: Int)
+abstract class CBase[+T](name: String, layer: CLayer, group: CGroup[_, _], v: SVector, width: Int, height: Int)
   extends CColourable[T] with CDrawable with CIdentification {
 
-  protected val _layer : CLayer = layer
+  /**
+   * The UI layer that the Widget is displayed upon.
+   */
+  protected val _layer: CLayer = layer
 
-  protected val _parent : CGroup[_,_] = group
+  /**
+   * The Parent Group Widget that the Widget is stored in.
+   */
+  protected val _parent: CGroup[_, _] = group
 
-  protected val _name : String = name
+  /**
+   * The Unique String that Identifies the Widget, registered in the specified UI Layer.
+   */
+  protected val _name: String = name
 
-  protected var _position : SVector = SVector(v)
+  /**
+   * The relative position of the Widget, its offset from its parent / corner of the screen.
+   */
+  protected var _position: SVector = SVector(v)
 
-  protected val _caption : CLabel = new CLabel(_layer,name,0,0,_colour.getCaption)
+  /**
+   * The Widget's colour scheme.
+   */
+  protected override val _colour: CColour = new CColour(if (hasParent) _parent.getColour else _layer.getColour)
 
+  /**
+   * The Caption label; the label to display the title of the Widget.
+   */
+  protected val _caption: CLabel = new CLabel(_layer, name, 0, 0, _colour.getCaption)
+
+  /**
+   * The Width of the Widget, if it is Fixed.
+   */
   protected var _width = width
 
+  /**
+   * The Height of the Widget, if it is Fixed.
+   */
   protected var _height = height
+
+  /**
+   * The Visibility of the Widget.
+   */
+  protected var _isVisible = true
+
+  /**
+   * Method to get the root ControlP5 Instance, if it is required.
+   *
+   * @return cp5 instance that controls this widget.
+   */
+  protected def getCP5: ControlP5 = _layer.getCP5
 
   /**
    * Method to get the identifying name of the object.
@@ -56,24 +96,80 @@ abstract class CBase[+T](name : String, layer: CLayer, group: CGroup[_,_], v : S
   def getName: String = _name
 
   /**
-   * Method to get the relative position of the object
+   * Method to get the Parent of This Widget.
    *
    * @return
    */
+  def getParent: CGroup[_, _] = _parent
+
+  /**
+   * Method to get the relative position of the object.
+   *
+   * @return the relative x/y coordinates as an SVector Object.
+   */
   def getPosition: SVector = _position
 
-  def getAbsolutePosition: SVector = if(_parent != null)_position + _parent.getAbsolutePosition else _position
+  /**
+   * Method to get the absolute position of the object.
+   *
+   * @return the actual x/y coordinates as an SVector Object.
+   */
+  def getAbsolutePosition: SVector = if (_parent != null) _position + _parent.getAbsolutePosition else _position
 
-  def getParent: CGroup[_,_] = _parent
+  /**
+   * Method to get the height of the object.
+   *
+   * @return height as an int.
+   */
+  def getHeight: Int = _height
 
-  def getCP5 : ControlP5 = _layer.getCP5
+  /**
+   * Method to get the width of the object.
+   *
+   * @return width as an int.
+   */
+  def getWidth: Int = _width
 
-  def getHeight = _height
+  /**
+   * Method to get the Title text of the object.
+   *
+   * @return the Caption of the object as a String.
+   */
+  def getCaptionText: String = _caption.getText
 
-  def getWidth = _width
+  /**
+   *
+   * @return
+   */
+  def isVisible: Boolean = _isVisible
 
-  def isCaptionVisible : Boolean = _caption.isVisible
+  /**
+   *
+   * @return
+   */
+  def isCaptionVisible: Boolean = _isVisible && _caption.isVisible
 
-  def hasParent : Boolean = _parent != null
+  /**
+   *
+   * @return
+   */
+  def hasParent: Boolean = _parent != null
 
+  /**
+   *
+   * @param text
+   */
+  def setCaptionText(text: String): Unit = {
+    _caption.setText(text)
+  }
+
+  /**
+   *
+   * @param width
+   * @param height
+   */
+  def setSize(width: Int, height: Int): Unit = {
+    _width = width
+    _height = height
+  }
 }

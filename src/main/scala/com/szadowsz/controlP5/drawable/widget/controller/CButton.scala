@@ -28,7 +28,7 @@ import com.szadowsz.controlP5.behaviour.synch.{CPlug, CPluggable}
 import com.szadowsz.controlP5.drawable.layer.CLayer
 import com.szadowsz.controlP5.drawable.widget.group.CGroup
 import com.szadowsz.controlP5.drawable.widget.view.CView
-import com.szadowsz.controlP5.input.mouse.action.CActionable
+import com.szadowsz.controlP5.input.mouse.controller.CActionable
 import com.szadowsz.processing.SVector
 import processing.core.PGraphics
 
@@ -73,7 +73,7 @@ object CButton {
  * @example controllers/ControlP5button
  */
 class CButton(layer: CLayer, parent: CGroup[_, _], name: String, v: SVector, width: Int, height: Int)
-  extends CController[CButton](name, layer, parent, v, width, height) with CActionable[CButton] with CPluggable[Boolean, CButton] {
+  extends CController[CButton](name, layer, parent, v, width, height) with CActionable with CPluggable[Boolean, CButton] {
 
   /**
    * How the CButton should be displayed.
@@ -105,25 +105,14 @@ class CButton(layer: CLayer, parent: CGroup[_, _], name: String, v: SVector, wid
 
   def isSwitch: Boolean = _isSwitch
 
-  def isInside(pos: SVector): Boolean = {
+  /**
+   * Method to check if the controller has a specified point (usually the mouse pointer) within its bounds.
+   *
+   * @param position the point to check against
+   * @return true if its inside, false otherwise
+   */
+  override def isInside(position: SVector): Boolean = {
     val start = getAbsolutePosition
-    start.x < pos.x && start.x + _width > pos.x && start.y < pos.y && start.y + _height > pos.y
+    start.x < position.x && start.x + _width > position.x && start.y < position.y && start.y + _height > position.y
   }
-
-  ///**
-  // * Convenience constructor to extend Button.
-  // *
-  // * @example use/ControlP5extendController
-  // */
-  //public Button( ControlP5 theControlP5 , String theName ) {
-  //this( theControlP5 , theControlP5.getDefaultTab( ) , theName , 0 , 0 , 0 , autoWidth , autoHeight );
-  //theControlP5.register( theControlP5.papplet , theName , this );
-  //}
-  //
-  //protected Button( ControlP5 theControlP5 , ControllerGroup< ? > theParent , String theName , float theDefaultValue , int theX , int theY , int theWidth , int theHeight ) {
-  //super( theControlP5 , theParent , theName , theX , theY , theWidth , theHeight );
-  //_myValue = theDefaultValue;
-  //_myCaptionLabel.align( CENTER , CENTER );
-  //}
-
 }
