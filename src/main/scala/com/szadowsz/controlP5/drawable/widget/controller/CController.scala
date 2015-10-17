@@ -10,17 +10,18 @@ import processing.core.PGraphics
 /**
  * @author Zakski : 04/10/2015.
  */
-abstract class CController[T <: CController[T]](name: String, layer: CLayer, parent: CGroup[_, _], v: SVector, width: Int, height: Int)
-  extends CBase[T](name, layer, parent, v, width, height) {
+abstract class CController[Self <: CController[Self]](name: String, layer: CLayer, parent: CGroup[_, _], v: SVector, width: Int, height: Int)
+  extends CBase[Self](name, layer, parent, v, width, height) {
+  self: Self =>
 
   /**
    * How the Controller should be displayed.
    */
-  protected var _view: CView[T]
+  protected var _view: CView[Self]
 
 
-  def setView(view : CView[T]): Unit = {
-    view.init(this.asInstanceOf[T])
+  def setView(view : CView[Self]): Unit = {
+    view.init(this.asInstanceOf[Self])
     _view = view
   }
 
@@ -33,7 +34,7 @@ abstract class CController[T <: CController[T]](name: String, layer: CLayer, par
     if (isVisible) {
       graphics.pushMatrix()
       graphics.translate(_position.x, _position.y)
-      _view.display(graphics, this.asInstanceOf[T])
+      _view.display(graphics, this.asInstanceOf[Self])
       graphics.popMatrix()
     }
   }

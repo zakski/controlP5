@@ -19,8 +19,11 @@
  */
 package com.szadowsz.controlP5.drawable.colour
 
+/**
+ * CColour Companion Object, holder of default themes and application functions.
+ */
 object CColour {
-  private val maskAlpha: Int = 0xff000000
+  private val ALPHA_MASK: Int = 0xff000000
 
   val THEME_RETRO = new CColour(0xff00698c, 0xff003652, 0xff08a2cf, 0xffffffff, 0xffffffff)
   val THEME_CP52014 = new CColour(0xff0074D9, 0xff002D5A, 0xff00aaff, 0xffffffff, 0xffffffff)
@@ -28,32 +31,103 @@ object CColour {
   val THEME_RED = new CColour(0xffaa0000, 0xff660000, 0xffff0000, 0xffffffff, 0xffffffff)
   val THEME_GREY = new CColour(0xffeeeeee, 0xffbbbbbb, 0xffffffff, 0xff555555, 0xff555555)
   val THEME_A = new CColour(0xff00FFC8, 0xff00D7FF, 0xffffff00, 0xff00B0FF, 0xff00B0FF)
+
+  /**
+   * Method to Generate a new CColour with the default colour scheme, THEME_CP5BLUE.
+   *
+   * @return a new CColour.
+   */
+  def apply(): CColour = new CColour()
+
+  /**
+   * Method to Generate a new CColour with a copy of the provided colour scheme.
+   *
+   * @param colour the provided colour scheme.
+   * @return a new CColour.
+   */
+  def apply(colour: CColour) = new CColour(colour)
+
+  /**
+   * Method takes in 5 processing colour encoded ints each of which represent a colour as part of the UI colour scheme.
+   *
+   * @param fore the foreground colour of the colour scheme.
+   * @param back the background colour of the colour scheme.
+   * @param act the active colour of the colour scheme.
+   * @param cap the caption colour of the colour scheme.
+   * @param valu the value colour of the colour scheme.
+   * @return a new CColour made up of those 5 colours.
+   */
+  def apply(fore: Int, back: Int, act: Int, cap: Int, valu: Int): CColour = new CColour(fore, back, act, cap, valu)
 }
 
 
 /**
- * A CColour instance contains the colours of a controller including the foreground, background,
+ * A CColour instance contains the colour scheme of a controller including the foreground, background,
  * active, caption and value colours.
+ *
+ * @constructor Constructor takes in 5 processing colour encoded ints each of which represent a colour as part of the UI
+ *              colour scheme.
+ *
+ * @param fore the foreground colour of the colour scheme.
+ * @param back the background colour of the colour scheme.
+ * @param act the active colour of the colour scheme.
+ * @param cap the caption colour of the colour scheme.
+ * @param valu the value colour of the colour scheme.
  */
-class CColour(cfg: Int, cbg: Int, cactive: Int, ccl: Int, cvl: Int) extends Serializable {
+final class CColour(fore: Int, back: Int, act: Int, cap: Int, valu: Int) extends Serializable {
 
-  private var _background: Int = cbg
+  /**
+   * The background colour of the colour scheme.
+   */
+  private var _background: Int = back
 
-  private var _foreground: Int = cfg
+  /**
+   * The foreground colour of the colour scheme.
+   */
+  private var _foreground: Int = fore
 
-  private var _active: Int = cactive
+  /**
+   * The active colour of the colour scheme.
+   */
+  private var _active: Int = act
 
-  private var _caption: Int = ccl
+  /**
+   * The caption colour of the colour scheme.
+   */
+  private var _caption: Int = cap
 
-  private var _value: Int = cvl
+  /**
+   * The value colour of the colour scheme.
+   */
+  private var _value: Int = valu
 
+  /**
+   * Constructor to Generate a new CColour with a copy of the provided colour scheme.
+   *
+   * @param colour the provided colour scheme.
+   */
   def this(colour: CColour) {
     this(colour.getForeground, colour.getBackground, colour.getActive, colour.getCaption, colour.getValue)
   }
 
-
+  /**
+   * Default Constructor generates a new CColour with the default colour scheme, THEME_CP5BLUE.
+   */
   def this() {
     this(CColour.THEME_CP5BLUE)
+  }
+
+  /**
+   * Protected Method to force all colours to be at least a tiny bit opaque. If you want something to be
+   * invisible, disable it properly.
+   *
+   * @param colour - the colour value to check.
+   * @return the colour value if valid, otherwise black.
+   */
+  private def ensureOpacity(colour: Int): Int = if ((colour & CColour.ALPHA_MASK) == 0) CColour.ALPHA_MASK else colour
+
+  protected def getColourString(colour: Int): String = {
+    "(" + (colour >> 16 & 0xff) + "," + (colour >> 8 & 0xff) + "," + (colour >> 0 & 0xff) + ")"
   }
 
   /**
@@ -91,18 +165,6 @@ class CColour(cfg: Int, cbg: Int, cactive: Int, ccl: Int, cvl: Int) extends Seri
    */
   def getActive: Int = _active
 
-  /**
-   * Protected Method to force all colours to be at least a tiny bit opaque. If you want something to be
-   * invisible, disable it properly.
-   *
-   * @param colour - the colour value to check
-   * @return the colour value if valid, otherwise black.
-   */
-  protected def ensureOpacity(colour: Int): Int = if ((colour & CColour.maskAlpha) == 0) CColour.maskAlpha else colour
-
-  protected def getColourString(colour: Int): String = {
-    "(" + (colour >> 16 & 0xff) + "," + (colour >> 8 & 0xff) + "," + (colour >> 0 & 0xff) + ")"
-  }
 
   /**
    * Method to set the foreground colour.
@@ -185,25 +247,12 @@ class CColour(cfg: Int, cbg: Int, cactive: Int, ccl: Int, cvl: Int) extends Seri
     colour.setValue(_value)
   }
 
-    override def hashCode: Int = {
-      var result: Int = 23
-      result = 37 * result + _background
-      result = 37 * result + _foreground
-      result = 37 * result + _active
-      result
-    }
 
-
-  override def equals(obj: Any): Boolean = {
-    obj match {
-      case cc: CColour => {
-        _background != cc._background || _foreground != cc._foreground || _active != cc._active ||
-          _caption != cc._caption || _value != cc._value
-      }
-      case _ => false
-    }
-  }
-
+  /**
+   * Method to get the String Representation of the Colour Scheme.
+   *
+   * @return the CColour object converted to a string.
+   */
   override def toString: String = {
     val build = StringBuilder.newBuilder
     build.append("fg " + getColourString(_foreground))

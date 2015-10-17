@@ -27,14 +27,21 @@ import com.szadowsz.controlP5.drawable.{CDrawable, CIdentification}
 import com.szadowsz.processing.SVector
 
 /**
+ * This class is inherited by all CGroup and CController classes. It provides a basic level of functionality expected
+ * by all controller and group objects. As part of this the class inherits the Identification, Colourable and Drawable
+ * Traits.
  *
- * The ControllerInterface is inherited by all ControllerGroup and Controller classes.
- *
- * This class inherits the Identification, Colourable and the Drawable Traits.
- *
+ * @param name The Unique String that Identifies the Widget.
+ * @param layer The UI layer that the Widget is displayed upon.
+ * @param group The Parent Group Widget that the Widget belongs to.
+ * @param v The relative position of the Widget.
+ * @param width The Width of the Widget.
+ * @param height The Height of the Widget.
+ * @tparam Self a trait/class that extends/implements this class.
  */
-abstract class CBase[+T](name: String, layer: CLayer, group: CGroup[_, _], v: SVector, width: Int, height: Int)
-  extends CColourable[T] with CDrawable with CIdentification {
+abstract class CBase[Self <: CBase[Self]](name: String, layer: CLayer, group: CGroup[_, _], v: SVector, width: Int, height: Int)
+  extends CColourable[Self] with CDrawable with CIdentification {
+  self: Self =>
 
   /**
    * The UI layer that the Widget is displayed upon.

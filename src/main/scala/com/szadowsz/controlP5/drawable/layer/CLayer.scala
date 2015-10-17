@@ -153,7 +153,7 @@ abstract class CLayer() extends CDrawable with CColourable[CLayer] with CMouseLi
    *
    * @param controller ControllerInterface
    */
-  protected def register(controller: CBase[_]): Unit = {
+  protected def register[V <: CBase[V]](controller: V): Unit = {
     if (_registry.contains(controller.getName)) {
       throw new InvalidParameterException("Controllers must have a unique name")
     }
