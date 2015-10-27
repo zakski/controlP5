@@ -200,24 +200,24 @@ final class CColour(fore: Int, back: Int, act: Int, cap: Int, valu: Int) extends
   }
 
   /**
-   * Method to set the value colour
+   * Method to set the value colour.
    *
-   * @param theColor - the colour to set
-   * @return the updated CColor
+   * @param value - the colour to set.
+   * @return the updated CColour.
    */
-  def setValue(theColor: Int): CColour = {
-    _value = ensureOpacity(theColor)
+  def setValue(value: Int): CColour = {
+    _value = ensureOpacity(value)
     this
   }
 
   /**
-   * Method to set the active colour
+   * Method to set the active colour.
    *
-   * @param theColor - the colour to set
-   * @return the updated CColor
+   * @param active - the colour to set.
+   * @return the updated CColour.
    */
-  def setActive(theColor: Int): CColour = {
-    _active = ensureOpacity(theColor)
+  def setActive(active: Int): CColour = {
+    _active = ensureOpacity(active)
     this
   }
 
